@@ -1,4 +1,4 @@
-name: Deploy HLRECGS to GitHub Pages
+name: Deploy ARMONI to GitHub Pages
 
 on:
   push:
