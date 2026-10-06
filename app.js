@@ -7,7 +7,7 @@ const esc = (v = "") => String(v).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&l
 const uid = () => crypto?.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
 const fmtDate = d => d ? new Intl.DateTimeFormat("id-ID", { day:"2-digit", month:"short", year:"numeric" }).format(new Date(d)) : "—";
 const fmtDateTime = d => d ? new Intl.DateTimeFormat("id-ID", { day:"2-digit", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" }).format(new Date(d)) : "—";
-const initials = n => String(n || "RS").split(/\\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("").toUpperCase();
+const initials = n => String(n || "RS").split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("").toUpperCase();
 const statusClass = s => {
   const x=String(s||"").toUpperCase();
   if(["ACTIVE","EFFECTIVE","APPROVED","COMPLETED","COMPLIANT","VALID","DONE","VERIFIED","SIGNED"].includes(x)) return "green";
