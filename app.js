@@ -1,7 +1,25 @@
-const C = window.hlregConfig;
-const SB = window.supabase && C?.supabaseUrl && C?.supabasePublishableKey
-  ? window.supabase.createClient(C.supabaseUrl, C.supabasePublishableKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } })
-  : null;
+const C = window.hlregConfig || {
+  appName: "ARMONI",
+  appTagline: "Alkadrie Regulatory, Legal, Ethics & Compliance Integrated System",
+  organizationName: "UPT RSUD Sultan Syarif Mohamad Alkadrie",
+  organizationShort: "RSUD SSMA",
+  demoAllowed: true,
+  demoLabel: "Preview / Demo",
+  blueprintVersion: "1.0",
+  blueprintDate: "6 Oktober 2026"
+};
+
+let SB = null;
+try {
+  if (window.supabase && C.supabaseUrl && C.supabasePublishableKey) {
+    SB = window.supabase.createClient(C.supabaseUrl, C.supabasePublishableKey, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    });
+  }
+} catch (err) {
+  console.error("[ARMONI] Supabase initialization failed:", err);
+  SB = null;
+}
 
 const esc = (v = "") => String(v).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[ch]));
 const uid = () => crypto?.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
@@ -185,16 +203,39 @@ async function loadLive(){
   state.data={regs,docs,tasks,obligations,contracts,licenses,cases,ethics,mail,templates};
 }
 async function loadSession(){
-  if(!SB){ state.loading=false; return; }
-  const {data:{user}}=await SB.auth.getUser();
-  if(!user){state.loading=false; render(); return;}
-  state.user=user;
-  const [p,r]=await Promise.all([
-    SB.from("profiles").select("full_name,job_title,unit,active").eq("id",user.id).maybeSingle(),
-    SB.from("user_roles").select("roles(code,name)").eq("user_id",user.id)
-  ]);
-  state.profile=p.data||null; state.roles=(r.data||[]).map(x=>x.roles).filter(Boolean);
-  await loadLive(); state.loading=false; render();
+  if(!SB){
+    state.loading=false;
+    render();
+    return;
+  }
+  try {
+    const {data:{user},error}=await SB.auth.getUser();
+    if(error) console.warn("[ARMONI] Session check:", error);
+    if(!user){
+      state.loading=false;
+      render();
+      return;
+    }
+    state.user=user;
+    const [p,r]=await Promise.all([
+      SB.from("profiles").select("full_name,job_title,unit,active").eq("id",user.id).maybeSingle(),
+      SB.from("user_roles").select("roles(code,name)").eq("user_id",user.id)
+    ]);
+    if(p.error) console.warn("[ARMONI] Profile query:", p.error);
+    if(r.error) console.warn("[ARMONI] Role query:", r.error);
+    state.profile=p.data||null;
+    state.roles=(r.data||[]).map(x=>x.roles).filter(Boolean);
+    await loadLive();
+    state.loading=false;
+    render();
+  } catch (err) {
+    console.error("[ARMONI] Startup session error:", err);
+    state.user=null;
+    state.profile=null;
+    state.roles=[];
+    state.loading=false;
+    render();
+  }
 }
 async function audit(action,object_type,object_id=null,metadata={}){ if(state.demo||!SB||!state.user) return; await SB.from("legal_audit_events").insert({actor_id:state.user.id,action,object_type,object_id,metadata_json:metadata,user_agent:navigator.userAgent}); }
 
@@ -263,7 +304,27 @@ document.addEventListener("submit", async e=>{
 document.addEventListener("input", e=>{if(e.target.matches("[data-search]")){state.search=e.target.value;clearTimeout(window.__searchTimer);window.__searchTimer=setTimeout(render,140);}});
 window.addEventListener("hashchange",()=>{state.view=currentView();render();});
 
-state.compact=localStorage.getItem("hlreg-compact")==="1";
+try { state.compact=localStorage.getItem("hlreg-compact")==="1"; } catch {}
 if(C?.demoAllowed && location.hash==="#/demo") state.demo=true;
-if(SB){ SB.auth.onAuthStateChange((_event,_session)=>{ if(_session && !state.loading && !state.user) loadSession(); }); }
+
+window.addEventListener("error", e=>{
+  console.error("[ARMONI] Unhandled UI error:", e.error || e.message);
+  const appEl=document.getElementById("app");
+  if(appEl && !appEl.innerHTML.trim()){
+    appEl.innerHTML=loginView();
+  }
+});
+window.addEventListener("unhandledrejection", e=>{
+  console.error("[ARMONI] Unhandled promise rejection:", e.reason);
+});
+
+if(SB){
+  SB.auth.onAuthStateChange((_event,_session)=>{
+    if(_session && !state.loading && !state.user) loadSession();
+  });
+}
+
+// Render the shell immediately. A backend/CDN problem must never produce a blank page.
+state.loading=false;
+render();
 loadSession();
