@@ -1,0 +1,12 @@
+{
+  "name": "HLRECGS — RSUD SSMA",
+  "short_name": "HLRECGS",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#0b1f33",
+  "description": "Hospital Legal, Regulatory, Ethics & Compliance Governance System",
+  "icons": [
+    { "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
