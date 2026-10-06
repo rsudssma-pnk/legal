@@ -1,4 +1,4 @@
-name: Validate HLRECGS
+name: Validate ARMONI
 
 on:
   push:
