@@ -112,8 +112,8 @@ function getRoles(){ return state.roles.map(r=>typeof r==="string"?r:r.code).fil
 function isRole(...roles){ const mine=getRoles(); return roles.some(x=>mine.includes(x)) || mine.includes("SUPER_ADMIN"); }
 function roleLabel(){ return state.demo ? "Preview / Demo" : (state.roles[0]?.name || state.roles[0]?.code || "Authenticated User"); }
 function userName(){ return state.demo ? "Demo Reviewer" : (state.profile?.full_name || state.user?.email || "Pengguna"); }
-function currentView(){ return location.hash.replace(/^#\\//,"").split("/")[0] || "dashboard"; }
-function currentId(){ return location.hash.replace(/^#\\//,"").split("/")[1] || null; }
+function currentView(){ return location.hash.replace(/^#\//,"").split("/")[0] || "dashboard"; }
+function currentId(){ return location.hash.replace(/^#\//,"").split("/")[1] || null; }
 function go(v,id=""){ location.hash="#/"+v+(id?"/"+id:""); state.sidebar=false; }
 
 function toast(message,type="success"){
