@@ -174,7 +174,24 @@ tbody tr:last-child td{border-bottom:0}
 .toast{min-width:270px;max-width:420px;background:#0d2237;color:#fff;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);display:flex;gap:10px;align-items:flex-start;animation:slideIn .22s ease}
 .toast.success{border-left:4px solid #5ac6a3}.toast.error{border-left:4px solid #e77971}.toast.warn{border-left:4px solid #e6ba67}
 @keyframes slideIn{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
-.login-shell{min-height:100vh;display:grid;grid-template-columns:1.08fr .92fr;background:#0b1f33}
+
+html[data-theme="dark"]{
+  --ink:#eaf1f7;--muted:#9cafc0;--line:#263949;--surface:#102235;--canvas:#071522;
+  --gold-soft:#3a321d;--green-soft:#123b31;--blue-soft:#162f54;--amber-soft:#3b2f1c;--red-soft:#42201e;--purple-soft:#2a2144;
+  --shadow:0 18px 42px rgba(0,0,0,.24);--shadow-sm:0 8px 24px rgba(0,0,0,.18);
+}
+html[data-theme="dark"] body{background:var(--canvas);color:var(--ink)}
+html[data-theme="dark"] .topbar{background:rgba(7,21,34,.9);border-color:#1f3346}
+html[data-theme="dark"] .icon-btn,html[data-theme="dark"] .top-btn,html[data-theme="dark"] .card,html[data-theme="dark"] .kpi-card,html[data-theme="dark"] .module-card,html[data-theme="dark"] .modal{background:var(--surface);border-color:var(--line);color:var(--ink)}
+html[data-theme="dark"] .input,html[data-theme="dark"] .select,html[data-theme="dark"] .textarea{background:#0b1b2a;color:var(--ink);border-color:#304658}
+html[data-theme="dark"] thead th{background:#0d1e2e;color:#91a5b8;border-color:var(--line)}
+html[data-theme="dark"] tbody td{border-color:#1f3344;color:#d3deea}
+html[data-theme="dark"] tbody tr:hover td{background:#12283d}
+html[data-theme="dark"] .meta-box,html[data-theme="dark"] .alert,html[data-theme="dark"] .login-note{background:#0d1e2e;border-color:#263b4d;color:#d8e3ed}
+html[data-theme="dark"] .ring::before{background:var(--surface)}
+html[data-theme="dark"] .workflow-step:not(:last-child)::after,html[data-theme="dark"] .timeline::before{background:#2a4154}
+html[data-theme="dark"] .empty-mark,html[data-theme="dark"] .kpi-icon,html[data-theme="dark"] .module-card .mod-icon,html[data-theme="dark"] .alert-icon{background:#162a3d}
+\n.login-shell{min-height:100vh;display:grid;grid-template-columns:1.08fr .92fr;background:#0b1f33}
 .login-visual{padding:60px;display:flex;flex-direction:column;justify-content:space-between;color:#fff;background:radial-gradient(circle at 20% 20%,rgba(198,168,91,.18),transparent 28%),linear-gradient(135deg,#0d2843,#08192a)}
 .login-brand{display:flex;align-items:center;gap:12px}
 .login-visual h1{font-size:46px;line-height:1.04;max-width:650px;letter-spacing:-1.5px;margin:0 0 16px}
