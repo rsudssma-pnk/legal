@@ -1,6 +1,6 @@
-# HLRECGS • UPT RSUD Sultan Syarif Mohamad Alkadrie
+# ARMONI • UPT RSUD Sultan Syarif Mohamad Alkadrie
 
-Hospital Legal, Regulatory, Ethics & Compliance Governance System.
+Alkadrie Regulatory, Legal, Ethics & Compliance Integrated System.
 
 Repository ini berisi frontend static untuk GitHub Pages dan terhubung ke Supabase sebagai system of record. Dokumen legal, SOP, evidence, dan arsip tidak disimpan di GitHub.
 
