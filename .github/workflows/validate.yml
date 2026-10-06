@@ -1,0 +1,30 @@
+name: Validate HLRECGS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Validate JavaScript syntax
+        run: node --check app.js
+      - name: Check required Pages assets
+        run: |
+          test -f index.html
+          test -f styles.css
+          test -f app.js
+          test -f config.js
+          test -f manifest.json
+          test -f .nojekyll
+          test -f .github/workflows/pages.yml
+          echo "Required assets OK"
