@@ -10,15 +10,38 @@ const C = window.hlregConfig || {
 };
 
 let SB = null;
-try {
-  if (window.supabase && C.supabaseUrl && C.supabasePublishableKey) {
-    SB = window.supabase.createClient(C.supabaseUrl, C.supabasePublishableKey, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-    });
-  }
-} catch (err) {
-  console.error("[ARMONI] Supabase initialization failed:", err);
-  SB = null;
+let supabaseLoading = false;
+let supabaseLoaded = false;
+
+function initSupabase(){
+  try {
+    if(window.supabase && C.supabaseUrl && C.supabasePublishableKey){
+      SB=window.supabase.createClient(C.supabaseUrl,C.supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      supabaseLoaded=true;
+      if(SB){
+        SB.auth.onAuthStateChange((_event,_session)=>{
+          if(_session && !state.loading && !state.user) loadSession();
+        });
+      }
+      return SB;
+    }
+  } catch(err){ console.error("[ARMONI] Supabase initialization failed:",err); }
+  return null;
+}
+
+function loadSupabase(){
+  if(supabaseLoading || supabaseLoaded || window.supabase) return Promise.resolve(initSupabase());
+  if(!C.supabaseUrl || !C.supabasePublishableKey) return Promise.resolve(null);
+  supabaseLoading=true;
+  return new Promise(resolve=>{
+    const script=document.createElement("script");
+    script.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0/dist/umd/supabase.min.js";
+    script.async=true;
+    script.crossOrigin="anonymous";
+    script.onload=()=>{ supabaseLoading=false; const client=initSupabase(); resolve(client); };
+    script.onerror=()=>{ supabaseLoading=false; console.warn("[ARMONI] Supabase CDN unavailable; continuing in offline/login mode."); resolve(null); };
+    document.head.appendChild(script);
+  });
 }
 
 const esc = (v = "") => String(v).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[ch]));
@@ -203,6 +226,7 @@ async function loadLive(){
   state.data={regs,docs,tasks,obligations,contracts,licenses,cases,ethics,mail,templates};
 }
 async function loadSession(){
+  if(!SB) await loadSupabase();
   if(!SB){
     state.loading=false;
     render();
@@ -318,13 +342,7 @@ window.addEventListener("unhandledrejection", e=>{
   console.error("[ARMONI] Unhandled promise rejection:", e.reason);
 });
 
-if(SB){
-  SB.auth.onAuthStateChange((_event,_session)=>{
-    if(_session && !state.loading && !state.user) loadSession();
-  });
-}
-
-// Render the shell immediately. A backend/CDN problem must never produce a blank page.
+// Render immediately; Supabase is intentionally non-blocking.
 state.loading=false;
 render();
 loadSession();
