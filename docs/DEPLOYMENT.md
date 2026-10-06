@@ -1,4 +1,4 @@
-# Deployment HLRECGS
+# Deployment ARMONI
 
 ## Current state
 
