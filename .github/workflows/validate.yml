@@ -26,5 +26,6 @@ jobs:
           test -f config.js
           test -f manifest.json
           test -f .nojekyll
-          test -f .github/workflows/pages.yml
-          echo "Required assets OK"
+          test -f 404.html
+          test -f .nojekyll
+          echo "ARMoni Pages assets OK"
