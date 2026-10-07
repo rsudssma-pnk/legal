@@ -239,3 +239,32 @@ html[data-theme="dark"] .empty-mark,html[data-theme="dark"] .kpi-icon,html[data-
   .card-head,.card-body{padding:14px}
   .login-panel{padding:18px}.login-card{padding:22px}
 }
+
+
+
+/* ARMONI Legal Document Center */
+.doc-hero{margin-bottom:16px}
+.doc-category-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
+.doc-category-card{appearance:none;width:100%;border:1px solid var(--line);background:var(--surface);border-radius:17px;padding:15px;display:grid;grid-template-columns:42px minmax(0,1fr) 18px;align-items:start;gap:12px;text-align:left;color:var(--ink);box-shadow:var(--shadow-sm);transition:.18s ease}
+.doc-category-card:hover{transform:translateY(-2px);border-color:#c6d3e0;box-shadow:var(--shadow)}
+.doc-category-card.active{border-color:#c6a85b;background:linear-gradient(180deg,var(--surface),#fbf8ee)}
+.doc-category-icon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:#edf3f8;color:#2f587b;font-size:18px}
+.doc-category-card.active .doc-category-icon{background:var(--gold-soft);color:#7b6320}
+.doc-category-card strong{display:block;font-size:13px;line-height:1.25}
+.doc-category-card small{display:block;margin-top:4px;font-size:10.5px;line-height:1.4;color:var(--muted)}
+.doc-category-card em{display:block;margin-top:8px;font-size:10px;font-style:normal;font-weight:800;color:#7b8794}
+.doc-chevron{color:#9aa8b7;padding-top:4px;font-weight:900}
+.sop-scope-box,.upload-box{grid-column:span 12;padding:15px;border:1px solid #d9e2eb;border-radius:15px;background:#f9fbfd}
+.sop-scope-box{border-left:4px solid var(--gold)}
+.upload-box{border:1px dashed #c8d6e2;background:#f7fbfe}
+.doc-empty{padding:18px;color:var(--muted)}
+html[data-theme="dark"] .doc-category-card{background:var(--surface);border-color:var(--line)}
+html[data-theme="dark"] .doc-category-card.active{background:linear-gradient(180deg,var(--surface),#332d1d)}
+html[data-theme="dark"] .doc-category-icon{background:#15293b;color:#9fbad1}
+html[data-theme="dark"] .sop-scope-box,html[data-theme="dark"] .upload-box{background:#0d1e2e;border-color:#2b4255}
+@media (max-width:1180px){
+  .doc-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:680px){
+  .doc-category-grid{grid-template-columns:1fr}
+}
