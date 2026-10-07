@@ -167,7 +167,7 @@ const state = { user:null, profile:null, roles:[], demo:false, loading:true, vie
 function seedState(){
   state.data={...DEMO,regs:[...DEMO.regs],docs:[...DEMO.docs],tasks:[...DEMO.tasks],obligations:[...DEMO.obligations],contracts:[...DEMO.contracts],licenses:[...DEMO.licenses],cases:[...DEMO.cases],ethics:[...DEMO.ethics],mail:[...DEMO.mail],templates:[...DEMO.templates],regFiles:[],sopScopes:[],categories:DOC_CATEGORIES};
   const sop=state.data.docs.find(x=>x.id==="d2"); if(sop){sop.document_type="SOP_PELAYANAN";sop.room_or_unit="Rawat Inap Melati";}
-  state.data.docs.push({id:"demo-sop-m-1",document_code:"DOC-SOP-M-2026-001",document_type:"SOP_MANAJERIAL",title:"SOP Pengendalian Dokumen dan Tata Naskah",number:"SOP/2026/001",status:"EFFECTIVE",security_class:"B",output_mode:"ELECTRONIC",owner_unit:"Bagian Umum",current_version_no:2,template_code:"SOP-A4",template_version:"1.8",updated_at:"2026-10-05T08:00:00Z",managerial_field:"Bagian Umum"};
+  state.data.docs.push({id:"demo-sop-m-1",document_code:"DOC-SOP-M-2026-001",document_type:"SOP_MANAJERIAL",title:"SOP Pengendalian Dokumen dan Tata Naskah",number:"SOP/2026/001",status:"EFFECTIVE",security_class:"B",output_mode:"ELECTRONIC",owner_unit:"Bagian Umum",current_version_no:2,template_code:"SOP-A4",template_version:"1.8",updated_at:"2026-10-05T08:00:00Z",managerial_field:"Bagian Umum"});
 }
 function getRoles(){ return state.roles.map(r=>typeof r==="string"?r:r.code).filter(Boolean); }
 function isRole(...roles){ const mine=getRoles(); return roles.some(x=>mine.includes(x)) || mine.includes("SUPER_ADMIN"); }
