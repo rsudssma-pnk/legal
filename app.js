@@ -96,6 +96,13 @@ const DOC_CATEGORIES = [
   {type:"NOTULA",label:"Notula",icon:"file",desc:"Catatan rapat."},
   {type:"KONTRAK_PERJANJIAN",label:"Perjanjian / Kontrak",icon:"contract",desc:"Perikatan/kerja sama yang dikelola legal."}
 ];
+const MANAGERIAL_FIELDS = [
+  "Bagian Umum",
+  "Bidang Penunjang Medik dan Non-Medik",
+  "Bidang Pengembangan dan Pengendalian Mutu, Pemasaran dan Hubungan Masyarakat",
+  "Bidang Pelayanan Medik dan Keperawatan"
+];
+const docCatLabel = type => (DOC_CATEGORIES.find(c=>c.type===type)?.label || String(type||"").replaceAll("_"," "));
 const DEMO = {
   regs:[
     {id:"r1",type:"PERWALI",number:"65",year:2023,title:"Peraturan Wali Kota Pontianak Nomor 65 Tahun 2023 tentang Tata Naskah Dinas",issuer:"Pemerintah Kota Pontianak",status:"ACTIVE",effective_date:"2024-02-01",verified_at:"2026-10-02"},
@@ -159,7 +166,11 @@ const storageSet = (key, value) => {
 
 const state = { user:null, profile:null, roles:[], demo:false, loading:true, view:"dashboard", sidebar:false, compact:false, modal:null, search:"", data:null, theme:storageGet("hlreg-theme","light") };
 
-function seedState(){ state.data={ ...DEMO, regs:[...DEMO.regs],docs:[...DEMO.docs],tasks:[...DEMO.tasks],obligations:[...DEMO.obligations],contracts:[...DEMO.contracts],licenses:[...DEMO.licenses],cases:[...DEMO.cases],ethics:[...DEMO.ethics],mail:[...DEMO.mail],templates:[...DEMO.templates],regFiles:[],sopScopes:[],categories:DOC_CATEGORIES }; }
+function seedState(){
+  state.data={...DEMO,regs:[...DEMO.regs],docs:[...DEMO.docs],tasks:[...DEMO.tasks],obligations:[...DEMO.obligations],contracts:[...DEMO.contracts],licenses:[...DEMO.licenses],cases:[...DEMO.cases],ethics:[...DEMO.ethics],mail:[...DEMO.mail],templates:[...DEMO.templates],regFiles:[],sopScopes:[],categories:DOC_CATEGORIES};
+  const sop=state.data.docs.find(x=>x.id==="d2"); if(sop){sop.document_type="SOP_PELAYANAN";sop.room_or_unit="Rawat Inap Melati";}
+  state.data.docs.push({id:"demo-sop-m-1",document_code:"DOC-SOP-M-2026-001",document_type:"SOP_MANAJERIAL",title:"SOP Pengendalian Dokumen dan Tata Naskah",number:"SOP/2026/001",status:"EFFECTIVE",security_class:"B",output_mode:"ELECTRONIC",owner_unit:"Bagian Umum",current_version_no:2,template_code:"SOP-A4",template_version:"1.8",updated_at:"2026-10-05T08:00:00Z",managerial_field:"Bagian Umum"};
+}
 function getRoles(){ return state.roles.map(r=>typeof r==="string"?r:r.code).filter(Boolean); }
 function isRole(...roles){ const mine=getRoles(); return roles.some(x=>mine.includes(x)) || mine.includes("SUPER_ADMIN"); }
 function roleLabel(){ return state.demo ? "Preview / Demo" : (state.roles[0]?.name || state.roles[0]?.code || "Authenticated User"); }
@@ -341,7 +352,7 @@ async function handleAction(el){ const a=el.dataset.action;
   if(a==="toggle-mobile"){state.sidebar=!state.sidebar;render();return;}
   if(a==="toggle-theme"){state.theme=state.theme==="dark"?"light":"dark";storageSet("hlreg-theme",state.theme);render();return;}
   if(a==="logout"){if(SB) await SB.auth.signOut(); state.user=null;state.profile=null;state.roles=[];state.demo=false;state.data=null;render();toast("Sesi berakhir.");return;}
-  if(a==="demo"){state.demo=true;state.loading=false;seedState();go("dashboard");render();toast("Mode demo aktif.","warn");return;}
+  if(a==="demo"){state.demo=true;state.loading=false;seedState();go("documents");render();toast("Mode demo ARMONI aktif.","warn");return;}
   if(a==="new"){ state.modal={module:el.dataset.module||"documents",docType:el.dataset.docType||""}; render();return; }
   if(a==="close-modal"){if(el.closest("[data-modal-stop]")&&!el.classList.contains("modal-backdrop")) return;modalClose();return;}
   if(a==="detail"){ if(el.dataset.module==="documents") go("documents",el.dataset.id); else toast("Detail akan mengikuti module workspace.");return; }
