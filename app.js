@@ -45,7 +45,7 @@ function loadSupabase(){
 }
 
 const esc = (v = "") => String(v).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[ch]));
-const uid = () => crypto?.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+const uid = () => globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : Math.random().toString(36).slice(2);
 const fmtDate = d => d ? new Intl.DateTimeFormat("id-ID", { day:"2-digit", month:"short", year:"numeric" }).format(new Date(d)) : "—";
 const fmtDateTime = d => d ? new Intl.DateTimeFormat("id-ID", { day:"2-digit", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" }).format(new Date(d)) : "—";
 const initials = n => String(n || "RS").split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("").toUpperCase();
@@ -146,7 +146,14 @@ const DEMO = {
   ]
 };
 
-const state = { user:null, profile:null, roles:[], demo:false, loading:true, view:"dashboard", sidebar:false, compact:false, modal:null, search:"", data:null, theme:localStorage.getItem("hlreg-theme")||"light" };
+const storageGet = (key, fallback = null) => {
+  try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; }
+};
+const storageSet = (key, value) => {
+  try { localStorage.setItem(key, value); } catch {}
+};
+
+const state = { user:null, profile:null, roles:[], demo:false, loading:true, view:"dashboard", sidebar:false, compact:false, modal:null, search:"", data:null, theme:storageGet("hlreg-theme","light") };
 
 function seedState(){ state.data={ ...DEMO, regs:[...DEMO.regs],docs:[...DEMO.docs],tasks:[...DEMO.tasks],obligations:[...DEMO.obligations],contracts:[...DEMO.contracts],licenses:[...DEMO.licenses],cases:[...DEMO.cases],ethics:[...DEMO.ethics],mail:[...DEMO.mail],templates:[...DEMO.templates] }; }
 function getRoles(){ return state.roles.map(r=>typeof r==="string"?r:r.code).filter(Boolean); }
@@ -296,9 +303,9 @@ async function resetPassword(){ const email=prompt("Masukkan email akun untuk re
 
 async function handleAction(el){ const a=el.dataset.action;
   if(a==="nav"){ go(el.dataset.view); render(); return; }
-  if(a==="toggle-compact"){state.compact=!state.compact;localStorage.setItem("hlreg-compact",state.compact?"1":"0");render();return;}
+  if(a==="toggle-compact"){state.compact=!state.compact;storageSet("hlreg-compact",state.compact?"1":"0");render();return;}
   if(a==="toggle-mobile"){state.sidebar=!state.sidebar;render();return;}
-  if(a==="toggle-theme"){state.theme=state.theme==="dark"?"light":"dark";localStorage.setItem("hlreg-theme",state.theme);render();return;}
+  if(a==="toggle-theme"){state.theme=state.theme==="dark"?"light":"dark";storageSet("hlreg-theme",state.theme);render();return;}
   if(a==="logout"){if(SB) await SB.auth.signOut(); state.user=null;state.profile=null;state.roles=[];state.demo=false;state.data=null;render();toast("Sesi berakhir.");return;}
   if(a==="demo"){state.demo=true;state.loading=false;seedState();go("dashboard");render();toast("Mode demo aktif.","warn");return;}
   if(a==="new"){ state.modal=el.dataset.module||"documents"; render();return; }
@@ -328,7 +335,7 @@ document.addEventListener("submit", async e=>{
 document.addEventListener("input", e=>{if(e.target.matches("[data-search]")){state.search=e.target.value;clearTimeout(window.__searchTimer);window.__searchTimer=setTimeout(render,140);}});
 window.addEventListener("hashchange",()=>{state.view=currentView();render();});
 
-try { state.compact=localStorage.getItem("hlreg-compact")==="1"; } catch {}
+try { state.compact=storageGet("hlreg-compact","") === "1"; } catch {}
 if(C?.demoAllowed && location.hash==="#/demo") state.demo=true;
 
 window.addEventListener("error", e=>{
