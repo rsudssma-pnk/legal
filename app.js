@@ -355,6 +355,9 @@ async function saveForm(form){
   }
   if(module==='regulatory'){
     if(!data.title||!data.type||!data.status)throw new Error('Judul, jenis, dan status regulasi wajib diisi.');
+    if(!file)throw new Error('File regulasi PDF wajib dipilih.');
+    if(file.type!=='application/pdf'&&!file.name.toLowerCase().endsWith('.pdf'))throw new Error('Hanya file PDF yang dapat diupload sebagai regulasi.');
+    if(file.size>20971520)throw new Error('Ukuran PDF melebihi batas 20 MB.');
     if(state.demo){state.data.regs.unshift({...data,id:uid(),year:data.year?Number(data.year):null,verified_at:new Date().toISOString()});state.modal=null;render();toast(file?'Regulasi demo tercatat; file tidak disimpan.':'Regulasi demo ditambahkan.','warn');return;}
     if(!SB||!isRole('SUPER_ADMIN','LEGAL_ADMIN','DOCUMENT_MANAGER'))throw new Error('Anda tidak memiliki hak mengelola regulasi.');
     const ins=await SB.from('legal_regulations').insert({title:data.title,type:data.type,number:data.number||null,year:data.year?Number(data.year):null,issuer:data.issuer||null,status:data.status,effective_date:data.effective_date||null,source_url:data.source_url||null,summary:data.summary||null}).select().single();if(ins.error)throw ins.error;
@@ -375,7 +378,7 @@ function fullPageForm(module,preset=''){
   const oldModal=state.modal; state.modal={module:module,docType:preset};
   const html=formModal(state.modal).replace('<div class="modal-backdrop" data-action="close-modal"><div class="modal" data-modal-stop>','<div class="workspace-editor card"><div class="modal-head">').replace('</div></div></div>','</div>');
   state.modal=oldModal;
-  return pageHead('Workspace Editor',title,'Halaman penuh untuk input, review, metadata, dan penyimpanan.')+html.replace(/<div class="modal-head">/,'<div class="modal-head">').replace(/<button class="icon-btn" data-action="close-modal"[^>]*>.*?<\/button>/,'<button class="top-btn" data-action="nav" data-view="'+(module==='regulatory'?'regulatory':'documents')+'">Kembali</button>').replace(/<button type="button" class="top-btn" data-action="close-modal">Batal<\/button>/,'<button type="button" class="top-btn" data-action="nav" data-view="'+(module==='regulatory'?'regulatory':'documents')+'">Batal</button>');
+  return pageHead('Workspace Editor',title,'Halaman penuh untuk input, review, metadata, dan penyimpanan.')+html.replace(/<button class="icon-btn" data-action="close-modal"[^>]*>.*?<\/button>/,'<button class="top-btn" data-action="nav" data-view="'+(module==='regulatory'?'regulatory':'documents')+'">Kembali</button>').replace(/<button type="button" class="top-btn" data-action="close-modal">Batal<\/button>/,'<button type="button" class="top-btn" data-action="nav" data-view="'+(module==='regulatory'?'regulatory':'documents')+'">Batal</button>');
 }
 function modalClose(){ state.modal=null; render(); }
 
@@ -385,8 +388,6 @@ function renderCurrent(){
   if(view==="documents"&&id) return docDetail(id);
   if(view==="regulatory"&&id) return regulatoryDetail(id);
   if(view==="regulatory-view"&&id) return viewRegPdf(id);
-  if(view==="sop-pelayanan") return sopPelayanan(id||"");
-  if(view==="sop-manajerial") return sopManajerial(id||"");
   if(view==="sop-pelayanan") return sopPelayanan(id||"");
   if(view==="sop-manajerial") return sopManajerial(id||"");
   if(view==="dashboard")return dashboard();
