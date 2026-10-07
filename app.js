@@ -65,33 +65,37 @@ const icon = n => {
 };
 
 const NAV = [
-  {group:"Utama",items:[
-    ["dashboard","Dashboard","Executive overview","grid"],
-    ["regulatory","Regulatory Hub","Regulasi & citation","book"],
-    ["documents","Document Studio","SK / SOP / Surat","file"],
-    ["approvals","Approval Inbox","Paraf & approval","check"]
-  ]},
-  {group:"Governance",items:[
-    ["sop","SOP & Policy","Lifecycle & procedure","workflow"],
-    ["compliance","Compliance Matrix","Obligation & evidence","shield"],
-    ["legal","Legal Cases","Issue & opinion","balance"],
-    ["ethics","Ethics Cases","Restricted review","heart"],
-    ["contracts","Contracts","Obligation & renewal","contract"],
-    ["licenses","Licenses","Expiry & renewal","license"]
-  ]},
-  {group:"Naskah & Arsip",items:[
-    ["incoming","Surat Masuk","Agenda & disposisi","mail"],
-    ["outgoing","Surat Keluar","Register & dispatch","mail"],
-    ["templates","Templates","Field mapping & golden sample","template"],
-    ["archive","Archive & Backup","Supabase + Drive","archive"],
-    ["audit","Audit Explorer","Immutable event history","audit"]
-  ]},
-  {group:"Administrasi",items:[
-    ["admin","Administration","Users, roles, policy","settings"]
+  {group:"Beranda",items:[
+    ["dashboard","Dashboard","Ringkasan kendali","grid"],
+    ["documents","Dokumen Hukum","Pusat semua produk legal & naskah","file"],
+    ["regulatory","Regulatory Hub","Regulasi & upload dokumen sumber","book"],
+    ["approvals","Approval Inbox","Paraf & approval","check"],
+    ["more","Governance & Tools","Case, compliance, kontrak, arsip & administrasi","settings"]
   ]}
 ];
 const VIEW_NAMES = Object.fromEntries(NAV.flatMap(g=>g.items.map(x=>[x[0],x[1]])));
 
+const DOC_CATEGORIES = [
+  {type:"SK_DIREKTUR",label:"Surat Keputusan Direktur",icon:"check",desc:"Keputusan/penetapan resmi Direktur."},
+  {type:"SOP_PELAYANAN",label:"SOP Pelayanan",icon:"workflow",desc:"SOP per ruangan/unit; lokasi diisi bebas."},
+  {type:"SOP_MANAJERIAL",label:"SOP Manajerial",icon:"settings",desc:"SOP berdasarkan 4 bidang manajerial RSUD."},
+  {type:"PERATURAN_DIREKTUR",label:"Peraturan Direktur",icon:"balance",desc:"Produk pengaturan internal rumah sakit."},
+  {type:"KEBIJAKAN",label:"Kebijakan",icon:"shield",desc:"Kebijakan internal rumah sakit/unit."},
+  {type:"PEDOMAN",label:"Pedoman",icon:"book",desc:"Pedoman penyelenggaraan kegiatan/program."},
+  {type:"INSTRUKSI",label:"Instruksi Direktur",icon:"arrow",desc:"Instruksi/pengarahan resmi."},
+  {type:"SURAT_EDARAN",label:"Surat Edaran",icon:"mail",desc:"Penyampaian ketentuan resmi."},
+  {type:"SURAT_DINAS",label:"Surat Dinas",icon:"mail",desc:"Korespondensi resmi."},
+  {type:"NOTA_DINAS",label:"Nota Dinas",icon:"file",desc:"Korespondensi internal resmi."},
+  {type:"MEMO",label:"Memo",icon:"file",desc:"Korespondensi internal ringkas."},
+  {type:"BERITA_ACARA",label:"Berita Acara",icon:"archive",desc:"Pencatatan kejadian/serah terima."},
+  {type:"SURAT_TUGAS",label:"Surat Tugas",icon:"calendar",desc:"Penugasan resmi."},
+  {type:"SURAT_PERINTAH",label:"Surat Perintah",icon:"arrow",desc:"Perintah pelaksanaan tugas."},
+  {type:"SURAT_KETERANGAN",label:"Surat Keterangan",icon:"file",desc:"Keterangan resmi."},
+  {type:"TELAAHAN_STAF",label:"Telaahan Staf",icon:"search",desc:"Analisis dan rekomendasi staf."},
+  {type:"LAPORAN",label:"Laporan",icon:"archive",desc:"Pelaporan kegiatan/hasil."},
+  {type:"NOTULA",label:"Notula",icon:"file",desc:"Catatan rapat."},
+  {type:"KONTRAK_PERJANJIAN",label:"Perjanjian / Kontrak",icon:"contract",desc:"Perikatan/kerja sama yang dikelola legal."}
+];
 const DEMO = {
   regs:[
     {id:"r1",type:"PERWALI",number:"65",year:2023,title:"Peraturan Wali Kota Pontianak Nomor 65 Tahun 2023 tentang Tata Naskah Dinas",issuer:"Pemerintah Kota Pontianak",status:"ACTIVE",effective_date:"2024-02-01",verified_at:"2026-10-02"},
