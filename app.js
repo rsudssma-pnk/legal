@@ -223,12 +223,23 @@ function more(){
 }
 function docDetail(id){ const d=state.data.docs.find(x=>x.id===id); if(!d) return pageHead("Dokumen","Tidak ditemukan","Dokumen tidak tersedia pada scope saat ini.",`<button class="top-btn" data-action="nav" data-view="documents">Kembali</button>`); const rules=[{id:"TN-001",label:"Arial 12"},{id:"TN-003",label:"Margin kiri ≥3 cm"},{id:"TN-004",label:"Margin kanan ≥2 cm"},{id:"TN-005",label:"Margin bawah ≥2,5 cm"},{id:"TN-009",label:"e-paraf logged"},{id:"TN-010",label:"Max 3 hierarchy paraf"},{id:"TN-013",label:"No stamp electronic"}]; return pageHead("Document Workspace",d.title,"Provenance, legal basis, template version, workflow, and finalization gate.",`<button class="top-btn" data-action="nav" data-view="documents">${icon("arrow")} Daftar</button><button class="top-btn gold" data-action="validate-doc" data-id="${d.id}">${icon("check")} Validate</button><button class="top-btn primary" data-action="generate-doc" data-id="${d.id}">${icon("download")} Generate</button>`)+`<div class="detail-grid"><div><div class="card"><div class="card-head"><div><div class="card-title">${esc(d.number||d.document_code)}</div><div class="card-subtitle">${esc(d.document_type)} • v${esc(d.current_version_no||1)} • ${esc(d.template_code||"No template")} v${esc(d.template_version||"—")}</div></div>${statusBadge(d.status)}</div><div class="card-body"><div class="meta-grid"><div class="meta-box"><div class="label">Owner unit</div><div class="value">${esc(d.owner_unit||"—")}</div></div><div class="meta-box"><div class="label">Security</div><div class="value">${esc(d.security_class)} • ${d.output_mode==="ELECTRONIC"?"Elektronik":"Kertas"}</div></div><div class="meta-box"><div class="label">Legal basis required</div><div class="value">${d.legal_basis_required?"Ya":"Tidak"}</div></div><div class="meta-box"><div class="label">Last updated</div><div class="value">${fmtDateTime(d.updated_at)}</div></div></div><div style="margin-top:18px"><div class="small muted" style="margin-bottom:8px">Lifecycle</div><div class="workflow">${["DRAFT","LEGAL REVIEW","UNIT REVIEW","PARAF","APPROVAL","SIGNATURE","EFFECTIVE"].map((x,i)=>{const active={DRAFT:0,LEGAL_REVIEW:1,UNIT_REVIEW:2,PARAF:3,APPROVAL:4,SIGNATURE:5,EFFECTIVE:6}[d.status]??1;return `<div class="workflow-step ${i<active?"done":""} ${i===active?"active":""}"><div class="workflow-dot">${i<active?"✓":i+1}</div><div class="workflow-label">${x}</div></div>`}).join("")}</div></div></div></div><div class="card" style="margin-top:16px"><div class="card-head"><div><div class="card-title">Tata Naskah Validator</div><div class="card-subtitle">Machine rules before generate/signature</div></div></div><div class="card-body">${rules.map(r=>`<div class="stat-line" style="margin-bottom:9px"><span><strong>${r.id}</strong> <span class="muted">${r.label}</span></span>${statusBadge("APPROVED")}</div>`).join("")}</div></div><div class="card" style="margin-top:16px"><div class="card-head"><div><div class="card-title">Audit & provenance</div><div class="card-subtitle">Immutable trail anchors</div></div></div><div class="card-body"><div class="timeline">${["Draft created","Legal basis attached","Review task opened","Template v"+(d.template_version||"1.0")+" resolved","Latest version hash registered"].map((x,i)=>`<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-title">${esc(x)}</div><div class="timeline-time">${i===4?"Pending final artifact":fmtDateTime(new Date(Date.now()-i*86400000))}</div></div>`).join("")}</div></div></div></div><div><div class="card"><div class="card-head"><div><div class="card-title">Legal basis</div><div class="card-subtitle">Citation object</div></div><button class="top-btn" data-action="new" data-module="regulatory">${icon("plus")}</button></div><div class="card-body"><div class="alert green"><div class="alert-icon">${icon("book")}</div><div><strong>Perwali 65/2023</strong><div class="small muted">Status ACTIVE • verified • citation available</div></div></div><div class="alert amber" style="margin-top:9px"><div class="alert-icon">${icon("refresh")}</div><div><strong>Impact watch</strong><div class="small muted">1 downstream document flagged for change review.</div></div></div></div></div><div class="card" style="margin-top:16px"><div class="card-head"><div><div class="card-title">Signature panel</div><div class="card-subtitle">Authority Matrix gate</div></div></div><div class="card-body"><div class="meta-box"><div class="label">Signer profile</div><div class="value">Direktur / pejabat berwenang</div><div class="small muted" style="margin-top:4px">Actual authority must be resolved from approved Authority Matrix.</div></div><div class="meta-box" style="margin-top:10px"><div class="label">Paraf hierarchy</div><div class="value">0 / max 3</div><div class="small muted" style="margin-top:4px">Electronic history only.</div></div><button class="top-btn" style="width:100%;margin-top:10px" data-action="signature-check">Signature gate</button></div></div></div></div>`; }
 
-function formModal(module){
+function formModal(modal){
+  const module=typeof modal==="string"?modal:modal?.module;
+  const preset=typeof modal==="object"?modal.docType:"";
   const defs={
-    documents:{title:"Buat Dokumen Terkendali",fields:[
-      ["title","Judul dokumen","text",true,"col-8"],["document_type","Jenis dokumen","select",true,"col-4",["SK_DIREKTUR","SOP","PEDOMAN","SURAT_DINAS"]],["owner_unit","Unit pemilik","text",true,"col-6"],["output_mode","Media output","select",true,"col-3",["ELECTRONIC","PAPER"]],["security_class","Klasifikasi","select",true,"col-3",["B","T","R","SR"]],["legal_basis_required","Wajib dasar hukum","select",true,"col-4",["YES","NO"]]
+    documents:{title:preset?("Buat "+docCatLabel(preset)):"Buat Dokumen Hukum",fields:[
+      ["title","Judul dokumen","text",true,"col-8"],
+      ["document_type","Jenis dokumen","select",true,"col-4",DOC_CATEGORIES.map(x=>x.type)],
+      ["owner_unit","Unit pemilik","text",true,"col-6"],
+      ["output_mode","Media output","select",true,"col-3",["ELECTRONIC","PAPER"]],
+      ["security_class","Klasifikasi","select",true,"col-3",["B","T","R","SR"]],
+      ["legal_basis_required","Wajib dasar hukum","select",true,"col-4",["YES","NO"]]
     ]},
-    regulatory:{title:"Tambah Regulasi",fields:[["title","Judul regulasi","text",true,"col-8"],["type","Jenis","text",true,"col-4"],["number","Nomor","text",false,"col-4"],["year","Tahun","number",false,"col-4"],["issuer","Penerbit","text",false,"col-4"],["status","Status","select",true,"col-4",["ACTIVE","AMENDED","REPEALED","STALE"]],["effective_date","Tanggal berlaku","date",false,"col-4"]]},
+    regulatory:{title:"Upload Regulasi + Dokumen Sumber",fields:[
+      ["title","Judul regulasi","text",true,"col-8"],["type","Jenis regulasi","text",true,"col-4"],
+      ["number","Nomor","text",false,"col-4"],["year","Tahun","number",false,"col-4"],["issuer","Penerbit","text",false,"col-4"],
+      ["status","Status","select",true,"col-4",["ACTIVE","AMENDED","REPEALED","STALE"]],["effective_date","Tanggal berlaku","date",false,"col-4"]
+    ]},
     compliance:{title:"Tambah Compliance Obligation",fields:[["obligation_code","Kode obligation","text",true,"col-4"],["title","Judul","text",true,"col-8"],["requirement_text","Requirement","textarea",true,"col-12"],["responsible_unit","Unit penanggung jawab","text",false,"col-6"],["priority","Priority","select",true,"col-3",["LOW","MEDIUM","HIGH","CRITICAL"]]]},
     contracts:{title:"Tambah Kontrak",fields:[["contract_no","Nomor kontrak","text",true,"col-4"],["title","Judul","text",true,"col-8"],["party_a","Pihak A","text",false,"col-6"],["party_b","Pihak B","text",false,"col-6"],["end_date","Tanggal berakhir","date",false,"col-4"],["owner_unit","Unit","text",false,"col-4"],["status","Status","select",true,"col-4",["DRAFT","ACTIVE","EXPIRING","EXPIRED"]]]},
     licenses:{title:"Tambah Lisensi / Izin",fields:[["license_type","Jenis","text",true,"col-4"],["number","Nomor","text",true,"col-4"],["issuer","Penerbit","text",false,"col-4"],["expiry_date","Tanggal expiry","date",false,"col-4"],["owner_unit","Unit","text",false,"col-4"],["responsible_name","PIC","text",false,"col-4"],["status","Status","select",true,"col-4",["VALID","EXPIRING","EXPIRED","SUSPENDED"]]]},
@@ -240,70 +251,11 @@ function formModal(module){
   };
   const d=defs[module]||defs.documents;
   const today=new Date().toISOString().slice(0,10);
-  const fields=d.fields.map(f=>{const [name,label,type,req,span,opts]=f; if(type==="select") return `<div class="field ${span}"><label>${esc(label)}${req?" *":""}</label><select class="select" name="${name}" ${req?"required":""}><option value="">Pilih…</option>${opts.map(o=>`<option value="${o}">${o.replaceAll("_"," ")}</option>`).join("")}</select></div>`; if(type==="textarea") return `<div class="field ${span}"><label>${esc(label)}${req?" *":""}</label><textarea class="textarea" rows="4" name="${name}" ${req?"required":""}></textarea></div>`; return `<div class="field ${span}"><label>${esc(label)}${req?" *":""}</label><input class="input" type="${type}" name="${name}" value="${name.includes("date")?today:""}" ${req?"required":""}></div>`; }).join("");
-  return `<div class="modal-backdrop" data-action="close-modal"><div class="modal" data-modal-stop><div class="modal-head"><div><div class="modal-title">${esc(d.title)}</div><div class="small muted">Structured form • server authoritative</div></div><button class="icon-btn" data-action="close-modal">${icon("close")}</button></div><form id="modal-form"><div class="modal-body"><div class="form-grid">${fields}</div><div class="login-note" style="margin-top:16px">Validator aktif: mandatory fields, legal basis, authority matrix, output mode, dan lifecycle gate akan dicek sebelum finalisasi.</div></div><div class="modal-foot"><button type="button" class="top-btn" data-action="close-modal">Batal</button><button type="submit" class="top-btn primary">${icon("check")} Simpan</button></div><input type="hidden" name="__module" value="${module}"></form></div></div>`;
+  const fields=d.fields.map(function(f){const [name,label,type,req,span,opts]=f;if(type==="select")return `<div class="field ${span}"><label>${esc(label)}${req?" *":""}</label><select class="select" name="${name}" ${req?"required":""}>${opts.map(function(o){const lbl=name==="document_type"?docCatLabel(o):o.replaceAll("_"," ");return `<option value="${o}" ${(name==="document_type"&&preset===o)?"selected":""}>${esc(lbl)}</option>`;}).join("")}</select></div>`;if(type==="textarea")return `<div class="field ${span}"><label>${esc(label)}${req?" *":""}</label><textarea class="textarea" rows="4" name="${name}" ${req?"required":""}></textarea></div>`;return `<div class="field ${span}"><label>${esc(label)}${req?" *":""}</label><input class="input" type="${type}" name="${name}" value="${name.includes("date")?today:""}" ${req?"required":""}></div>`;}).join("");
+  const sopExtra=module==="documents"?`<input type="hidden" name="__doc_type" value="${esc(preset)}"><div class="sop-scope-box"><div><strong>SOP Scope</strong><div class="small muted">Jika jenis SOP Pelayanan, isi ruangan/unit secara bebas. Jika SOP Manajerial, pilih salah satu dari 4 bidang.</div></div><div class="form-grid" style="margin-top:12px"><div class="field col-6"><label>Ruangan / Unit Pelayanan</label><input class="input" name="room_or_unit" placeholder="Contoh: IGD, Ruang Melati, Farmasi"></div><div class="field col-6"><label>Bidang Manajerial</label><select class="select" name="managerial_field"><option value="">Pilih bila SOP Manajerial…</option>${MANAGERIAL_FIELDS.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("")}</select></div></div></div>`:"";
+  const uploadExtra=module==="regulatory"?`<div class="upload-box"><label>File regulasi</label><input class="input" type="file" name="reg_file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"><div class="help">Maksimum 20 MB. File privat, metadata dicatat, checksum SHA-256 dihitung saat upload.</div><div class="field" style="margin-top:9px"><label>Catatan</label><textarea class="textarea" name="file_notes" rows="2" placeholder="Sumber / keterangan file"></textarea></div></div>`:"";
+  return `<div class="modal-backdrop" data-action="close-modal"><div class="modal" data-modal-stop><div class="modal-head"><div><div class="modal-title">${esc(d.title)}</div><div class="small muted">ARMONI • RLS • Audit • Integrity</div></div><button class="icon-btn" data-action="close-modal">${icon("close")}</button></div><form id="modal-form"><div class="modal-body"><div class="form-grid">${fields}</div>${sopExtra}${uploadExtra}<div class="login-note" style="margin-top:16px">Validator: field wajib, legal basis, authority, output mode, SOP scope, lifecycle.</div></div><div class="modal-foot"><button type="button" class="top-btn" data-action="close-modal">Batal</button><button type="submit" class="top-btn primary">${icon("check")} Simpan</button></div><input type="hidden" name="__module" value="${module}"></form></div></div>`;
 }
-
-async function liveQuery(table, select="*"){ if(!SB) return []; const {data,error}=await SB.from(table).select(select).limit(200); if(error){ console.warn(table,error); return []; } return data||[]; }
-async function loadLive(){
-  const [regs,docs,tasks,obligations,contracts,licenses,cases,ethics,mail,templates]=await Promise.all([
-    liveQuery("legal_regulations"),liveQuery("legal_documents"),liveQuery("legal_workflow_tasks"),liveQuery("legal_compliance_obligations"),liveQuery("legal_contracts"),liveQuery("legal_licenses"),liveQuery("legal_cases"),liveQuery("legal_ethics_cases"),liveQuery("legal_mail_register"),liveQuery("legal_templates")
-  ]);
-  state.data={regs,docs,tasks,obligations,contracts,licenses,cases,ethics,mail,templates};
-}
-async function loadSession(){
-  if(!SB) await loadSupabase();
-  if(!SB){
-    state.loading=false;
-    render();
-    return;
-  }
-  try {
-    const {data:{user},error}=await SB.auth.getUser();
-    if(error) console.warn("[ARMONI] Session check:", error);
-    if(!user){
-      state.loading=false;
-      render();
-      return;
-    }
-    state.user=user;
-    const [p,r]=await Promise.all([
-      SB.from("profiles").select("full_name,job_title,unit,active").eq("id",user.id).maybeSingle(),
-      SB.from("user_roles").select("roles(code,name)").eq("user_id",user.id)
-    ]);
-    if(p.error) console.warn("[ARMONI] Profile query:", p.error);
-    if(r.error) console.warn("[ARMONI] Role query:", r.error);
-    state.profile=p.data||null;
-    state.roles=(r.data||[]).map(x=>x.roles).filter(Boolean);
-    await loadLive();
-    state.loading=false;
-    render();
-  } catch (err) {
-    console.error("[ARMONI] Startup session error:", err);
-    state.user=null;
-    state.profile=null;
-    state.roles=[];
-    state.loading=false;
-    render();
-  }
-}
-async function audit(action,object_type,object_id=null,metadata={}){ if(state.demo||!SB||!state.user) return; await SB.from("legal_audit_events").insert({actor_id:state.user.id,action,object_type,object_id,metadata_json:metadata,user_agent:navigator.userAgent}); }
-
-async function saveForm(form){
-  const fd=new FormData(form); const module=fd.get("__module"); const data=Object.fromEntries([...fd.entries()].filter(([k])=>!k.startsWith("__")));
-  if(module==="documents"){
-    let number=null; if(!state.demo && SB && isRole("LEGAL_ADMIN","DOCUMENT_MANAGER")){ const y=new Date().getFullYear(); const r=await SB.rpc("reserve_legal_number",{p_document_type:data.document_type,p_year:y,p_prefix:"RSUD-SSMA"}); if(!r.error) number=r.data; }
-    const row={document_code:`DOC-${data.document_type}-${Date.now()}`,document_type:data.document_type,title:data.title,number,owner_unit:data.owner_unit,security_class:data.security_class,output_mode:data.output_mode,legal_basis_required:data.legal_basis_required==="YES",template_code:data.document_type==="SK_DIREKTUR"?"SK-DIR":data.document_type==="SOP"?"SOP-A4":"A4",template_version:"1.0",owner_user_id:state.demo?"demo":state.user?.id,created_by:state.demo?null:state.user?.id,status:"DRAFT"};
-    if(state.demo){ const n={...row,id:uid(),current_version_no:1,updated_at:new Date().toISOString()}; state.data.docs.unshift(n); toast("Draft dokumen berhasil dibuat."); go("documents"); render(); return; }
-    const {data:r,error}=await SB.from("legal_documents").insert(row).select().single(); if(error) throw error; await SB.from("legal_document_versions").insert({document_id:r.id,version_no:1,content_json:{title:data.title},template_code:row.template_code,template_version:row.template_version,created_by:state.user.id}); await audit("CREATE","DOCUMENT",r.id,{document_type:data.document_type}); toast("Draft dokumen berhasil disimpan ke Supabase."); await loadLive(); go("documents"); render(); return;
-  }
-  const map={regulatory:["legal_regulations",{...data,year:data.year?Number(data.year):null}],compliance:["legal_compliance_obligations",data],contracts:["legal_contracts",data],licenses:["legal_licenses",data],legal:["legal_cases",{...data,owner_id:state.demo?"demo":state.user?.id,created_by:state.demo?null:state.user?.id,status:"NEW"}],ethics:["legal_ethics_cases",{...data,owner_id:state.demo?"demo":state.user?.id,status:"INTAKE"}],incoming:["legal_mail_register",{...data,direction:"INCOMING",status:"REGISTERED",created_by:state.demo?null:state.user?.id}],outgoing:["legal_mail_register",{...data,direction:"OUTGOING",status:"REGISTERED",created_by:state.demo?null:state.user?.id}],templates:["legal_templates",{...data,created_by:state.demo?null:state.user?.id}]}[module];
-  if(!map) throw new Error("Form tidak dikenal");
-  if(state.demo){ const n={...map[1],id:uid(),created_at:new Date().toISOString()}; const key={regulatory:"regs",compliance:"obligations",contracts:"contracts",licenses:"licenses",legal:"cases",ethics:"ethics",incoming:"mail",outgoing:"mail",templates:"templates"}[module]; if(module==="incoming"||module==="outgoing") state.data.mail.unshift(n); else state.data[key].unshift(n); toast("Record contoh ditambahkan di mode demo."); state.modal=null; render(); return; }
-  const {data:r,error}=await SB.from(map[0]).insert(map[1]).select().single(); if(error) throw error; await audit("CREATE",module.toUpperCase(),r.id,{}); toast("Data berhasil disimpan."); state.modal=null; await loadLive(); render();
-}
-
-async function approveTask(id){ const t=state.data.tasks.find(x=>x.id===id); if(!t) return; if(state.demo){t.status="APPROVED"; const d=state.data.docs.find(x=>x.id===t.document_id); if(d) d.status="SIGNATURE"; toast("Task disetujui (demo)."); render(); return; } const {error}=await SB.from("legal_workflow_tasks").update({status:"APPROVED",completed_at:new Date().toISOString()}).eq("id",id); if(error){toast(error.message,"error");return;} await SB.from("legal_approval_history").insert({document_id:t.document_id,version_no:state.data.docs.find(x=>x.id===t.document_id)?.current_version_no||1,actor_id:state.user.id,action:"APPROVE",comment:"Approved from ARMONI"}); await SB.from("legal_documents").update({status:"SIGNATURE"}).eq("id",t.document_id); await audit("APPROVE","WORKFLOW",id,{}); toast("Approval berhasil dicatat."); await loadLive(); render(); }
 function modalClose(){ state.modal=null; render(); }
 
 function renderCurrent(){
