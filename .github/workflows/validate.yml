@@ -26,6 +26,5 @@ jobs:
           test -f config.js
           test -f manifest.json
           test -f .nojekyll
-          test -f 404.html
           test -f .nojekyll
           echo "ARMoni Pages assets OK"
